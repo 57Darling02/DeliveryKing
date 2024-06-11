@@ -54,6 +54,7 @@ def floydWarshall(graph):
                 if dist[i][j] > dist[i][k] + dist[k][j]:
                     dist[i][j] = dist[i][k] + dist[k][j]
     return dist
+
 def perms(dingdanm):
     result = [[]]
     while (dingdanm):
@@ -77,6 +78,7 @@ def perms(dingdanm):
         result = new_result
     # print(len(result))
     return result
+
 def dpmin(G,start,dingdamn):
     M = np.inf
     all_path = perms(dingdamn)
@@ -93,14 +95,6 @@ def dpmin(G,start,dingdamn):
     minpath.insert(0,start)
     return minlength,minpath
 
-def get_path(path,start, end):
-    path_list = []
-    current = start
-    while current != end:
-        path_list.append(current)
-        current = (int)(path[current][end])
-    # path_list.append(end)
-    return path_list  # 反转列表以得到正确的顺序
 def dijk(ori_graph,start,end):
     n = len(ori_graph)
     dist=np.full(n, np.inf)
