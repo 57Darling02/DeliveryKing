@@ -78,13 +78,49 @@ def perms(dingdanm):
         result = new_result
     # print(len(result))
     return result
+# 耦合版
+def dpmin2(G,start,dingdanm): # 120
+    M = np.inf
+    minlength = M
+    minpath = []
+    result = [[]]
+    end = False
+    while (dingdanm):
+        danm = dingdanm.pop()
+        if not dingdanm:
+            end = True
+        new_result = []
+        for org in result:
+            j = len(org)
+            while j >= 0:
+                i = 0
+                while i <= j:
+                    add = org.copy()
+                    add.insert(i, danm[0])
+                    add.insert(j + 1, danm[1])
+                    if end:
+                        length = G[start][add[0]]
+                        for node in range(len(add) - 1):
+                            length += G[add[node]][add[node + 1]]
+                        if length < minlength:
+                            minlength = length
+                            minpath = add
+                        pass
+                    new_result.append(add)
+                    i += 1
+                j -= 1
+        # print(new_result)
+        result = new_result
+    # print(len(result))
+    minpath.insert(0, start)
+    return minlength, minpath
 
-def dpmin(G,start,dingdamn):
+
+def dpmin(G,start,dingdamn):#110
     M = np.inf
     all_path = perms(dingdamn)
     minlength = M
     minpath = []
-
     for path in all_path:
         length = G[start][path[0]]
         for node in range(len(path)-1):

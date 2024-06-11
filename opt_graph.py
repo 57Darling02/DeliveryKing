@@ -12,9 +12,9 @@ df = pd.read_excel('data.xlsx', sheet_name=0,header=None)
 df.replace('M', M, inplace=True)
 
 # 如果需要将数据转换为二维数组（numpy数组）
-graph = df.values
-
-print(df)
-dist= optalg.floydWarshall(graph)
+graph = np.copy(df.values)
+# print(df)
+dist= optalg.floydWarshall(df.values)
+# print(graph)
 np.savetxt("opt_graph.txt", dist)
 np.savetxt("ori_graph.txt",graph)
