@@ -5,21 +5,24 @@ M = math.inf
 G = np.loadtxt("opt_graph.txt")
 OG = np.loadtxt("ori_graph.txt")
 # 等待顾客取餐的时间 min
-waittime1 = 3
-def throw_wait():
+def throw_wait(x=1):
     # 定义正态分布的参数：均值（mean），标准差（stddev）
     mean = 3  # 均值
     stddev = 0.6  # 标准差
-    # return 3
-    return max(0.1 ,np.random.normal(mean, stddev))
+    if x==0:
+        return mean
+    else:
+        return max(0.1 ,np.random.normal(mean, stddev))
 # 骑手进店取餐耗时
 waittime2 = 1
-def pick_wait():
+def pick_wait(x=1):
     # 定义正态分布的参数：均值（mean），标准差（stddev）
     mean = 1  # 均值
     stddev = 0.2  # 标准差
-    # return 1
-    return max(0.1 ,np.random.normal(mean, stddev))
+    if x==0:
+        return mean
+    else:
+        return max(0.1 ,np.random.normal(mean, stddev))
 #平均每分钟移动的距离 60km/h = 1km/min  40km/h = 0.667km/h
 averspeed = 0.667
 # 最后一单送达时间限制
@@ -71,11 +74,12 @@ while True:
             # print(new_get_index)
             dingdamn = [take_out[i] for i in new_get_index]
             newlenth,newpath = optalg.dpmin(G,start,dingdamn)
-            newtime = (n-1)*throw_wait()+ newlenth/averspeed +n*pick_wait()
+            newtime = (n-1)*throw_wait(0)+ newlenth/averspeed +n*pick_wait(0)
+            estimatedtime = (n-1)*throw_wait()+ newlenth/averspeed +n*pick_wait()
             if newtime < limit_time:
-                newstatus = {"time": newtime, "stage": n, "ReceviedOrder": new_get_index, "active": True,"path":newpath}
+                newstatus = {"time": newtime,"estimatedtime":estimatedtime, "stage": n, "ReceviedOrder": new_get_index, "active": True,"path":newpath}
             else:
-                newstatus = {"time": newtime, "stage": n, "ReceviedOrder": new_get_index, "active": False,"path":newpath}
+                newstatus = {"time": newtime,"estimatedtime":estimatedtime,  "stage": n, "ReceviedOrder": new_get_index, "active": False,"path":newpath}
             allstatus.append(newstatus)
     # print(allstatus)
     if not allstatus:
