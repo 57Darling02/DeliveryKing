@@ -4,6 +4,7 @@ import optalg
 import time
 M = math.inf
 start_time = time.time()
+optresult=[] # {itercount:opt_status}
 G = np.loadtxt("opt_graph.txt")
 OG = np.loadtxt("ori_graph.txt")
 # 等待顾客取餐的时间 min
@@ -26,13 +27,9 @@ def pick_wait(x=1):
     else:
         return max(0.1 ,np.random.normal(mean, stddev))
 #平均每分钟移动的距离 60km/h = 1km/min  40km/h = 0.667km/h
-averspeed = 1
+averspeed = 0.667
 # 最后一单送达时间限制
 limit_time = 60
-
-
-
-
 def printresult(stage,opt_status,OG):
     for n,stagelist in stage.items():
         print(f"**************第{n}阶段:***************")
@@ -65,13 +62,14 @@ def GetTime(start_time,opt_status,OG,itercount):
             print("运行超过5s,输出当前最优结果:")
             print(f"当前迭代次数{itercount}")
             print_opt(opt_status,OG)
-            print("程序继续运行,将每隔5s输出一次最优目前最优解")
+            print("程序继续运行,将会在最优解得到更新时输出")
         elif T - GetTime.last_run_time >= 5:
             print("当前最优结果:")
             print(f"当前迭代次数{itercount}")
             print_opt(opt_status, OG)
             print("程序继续运行...")
             GetTime.last_run_time = T
+    return T
 
 
 ########################################Q1
@@ -88,8 +86,6 @@ take_out = [
     [11,14],
     [6,8], #0.06
     [6,8], # 1.4
-    [5,8], # 1.726180076599121 seconds
-    [6,9], # 9.149291515350342 seconds
     [7,8], # 10.777399063110352 seconds
     [8,40], #  13.456018447875977 seconds
     [9,8], # 15.147678852081299 seconds
@@ -102,6 +98,18 @@ take_out = [
     [35,36],
 ]
 take_out_index = list(range(len(take_out)))
+# opttakeout = []
+# for i in take_out:
+#     if not opttakeout:
+#         for j in range(len(opttakeout)):
+#             if opttakeout[j][0] == i[0] and opttakeout[j][1]==i[1]:
+#                 opttakeout[2].append(j)
+#             else:
+#                 i.append([j])
+#                 opttakeout.append(i)
+#     else:
+#         opttakeout.append([take_out[0],[0]])
+# print(opttakeout)
 ##init
 n=0
 stage ={} # 放所有阶段 stage[0]就算n=0
@@ -110,9 +118,13 @@ opt_status={"time":0,"stage":0,"ReceviedOrder": set(),"active":True,"path":[]}
 allstatus.append(opt_status)
 stage[0] = allstatus
 itercount = 0
+
 ##动态规划
 while True:
     n+=1 #阶段数/单量
+    if n>7:
+        print("over6")
+        break
     allstatus =[] #放本阶段包含的所有
     for prestage_statu in stage[n-1]:
         if not prestage_statu["active"]:
@@ -142,18 +154,21 @@ while True:
             else:
                 newstatus = {"time": newtime,"estimatedtime":estimatedtime,  "stage": n, "ReceviedOrder": new_get_index, "active": False,"path":newpath}
             # 找最优
-            if newstatus.get("time")<=limit_time and newstatus.get("stage")>=opt_status.get("stage"):
-                if newstatus.get("stage")>opt_status.get("stage"):
-                    opt_status = newstatus
-                elif newstatus.get("time")<opt_status.get("time"):
-                    opt_status = newstatus
-            allstatus.append(newstatus)
             itercount+=1
-            GetTime(start_time, opt_status, OG,itercount)
+            temptime = GetTime(start_time, opt_status, OG, itercount) - start_time
+            if newstatus.get("time")<=limit_time and newstatus.get("stage")>=opt_status.get("stage"):
+                # if newstatus.get("stage")>opt_status.get("stage"):
+                opt_status = newstatus
+                optresult.append(f"接单数{n},迭代次数{itercount},运行至此耗时{round(temptime,2)}s")
+                # elif newstatus.get("time")<opt_status.get("time"):
+                #     opt_status = newstatus
+                    # optresult.append(f"接单数{n},迭代次数{itercount},运行至此耗时{round(temptime, 2)}s")
+            allstatus.append(newstatus)
     # print(allstatus)
     if not allstatus:
         break
     stage[n]=allstatus
-
 printresult(stage,opt_status,OG)
 print(f"exc:{time.time()-start_time}")
+for i in optresult:
+    print(i)
